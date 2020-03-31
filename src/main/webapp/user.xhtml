@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+<h:head>
+    <title>Users</title>
+    <script type="text/javascript">
+        function handleInsert(xhr, status, args, dialog) {
+            if (args.validationFailed) {
+                PF(dialog).jq.effect("shake", {
+                    times: 3
+                }, 100);
+            } else {
+                PF(dialog).hide();
+            }
+        }
+    </script>
+    <h:outputStylesheet name="primeicons/primeicons.css" library="primefaces" />
+</h:head>
+<style type="text/css">
+    .ui-row-editor .ui-row-editor-pencil {
+        margin-left: 8px;
+    }
+</style>
+
+<h:body>
+    <h:form id="form">
+        <p:growl id="msgs" showDetail="true"/>
+        <p:growl id="growl" showDetail="true"/>
+        <p:panel header="Felhasználók:" id="usersPanel">
+
+            <p:dataTable id="users" widgetVar="users" var="user" value="#{userController.users}" editable="true"
+                         style="margin-bottom:20px">
+                <p:ajax event="rowEdit" listener="#{userController.onUserEdit}" update=":form:msgs"/>
+
+                <p:column headerText="Id">
+                    <h:outputText value="#{user.id}"/>
+                </p:column>
+
+                <p:column headerText="Név">
+                    <p:cellEditor>
+                        <f:facet name="output"><h:outputText value="#{user.name}"/></f:facet>
+                        <f:facet name="input">
+                            <p:inputText value="#{user.name}" required="true"
+                                         requiredMessage="A nevet kötelező megadni"
+                                         validatorMessage="A névnek legalább 2 karakternek kell lennie"
+                                         style="width:96%" label="Név">
+                                <f:validateLength minimum="2"/>
+                            </p:inputText>
+                        </f:facet>
+                    </p:cellEditor>
+                </p:column>
+
+                <p:column headerText="Email">
+                    <p:cellEditor>
+                        <f:facet name="output"><h:outputText value="#{user.email}"/></f:facet>
+                        <f:facet name="input">
+                            <p:inputText value="#{user.email}" style="width:96%" label="E-mail" required="true"
+                                         validatorMessage="Nem megfelelő az email cím formátuma">
+                                <f:validateRegex
+                                        pattern="[\w\.-]*[a-zA-Z0-9_]@[\w\.-]*[a-zA-Z0-9]\.[a-zA-Z][a-zA-Z\.]*[a-zA-Z]"/>
+                            </p:inputText>
+                        </f:facet>
+                    </p:cellEditor>
+                </p:column>
+
+                <p:column headerText="Jelszó">
+                    <p:cellEditor>
+                        <f:facet name="output"><h:outputText value=""/></f:facet>
+                        <f:facet name="input">
+                            <p:inputText value="#{userController.newPassword}" style="width:96%"
+                                         validatorMessage="A jelszónak legalább 6 karakternek kell lennie."
+                                         label="Jelszó">
+                                <f:validateLength minimum="6"/>
+                            </p:inputText>
+                        </f:facet>
+                    </p:cellEditor>
+                </p:column>
+
+                <p:column headerText="Címek">
+                    <h:commandLink value="Szerkesztés"
+                                   action="#{userController.onUserAddresses(user)}">
+                        <f:ajax execute="action"/>
+                    </h:commandLink>
+                </p:column>
+
+                <p:column headerText="felh. szerk." style="width:45px">
+                    <p:rowEditor/>
+                </p:column>
+                <p:column headerText="felh. törl." style="width:35px">
+                    <p:commandButton icon="pi pi-times" process="@this" update="users" action="#{userController.deleteUser(user)}">
+                        <f:ajax execute="action"/>
+                    </p:commandButton>
+                </p:column>
+            </p:dataTable>
+
+            <p:contextMenu for="users" widgetVar="cMenu">
+                <p:menuitem value="Edit Cell" icon="pi pi-search"
+                            onclick="PF('cellCars').showCellEditor();return false;"/>
+                <p:menuitem value="Hide Menu" icon="pi pi-times" onclick="PF('cMenu').hide()"/>
+            </p:contextMenu>
+
+            <h:outputLink value="javascript:void(0)" onclick="PF('addUserDlg').show();">
+                <p:commandButton
+                        type="button"
+                        value="Új felhasználó"/>
+            </h:outputLink>
+        </p:panel>
+
+        <p:commandButton value="Kijelentkezés" process="@this" action="#{userController.logout}" style="margin-right:20px;" />
+
+        <p:dialog header="#{user.name}" widgetVar="dlg1" minHeight="40" height="200">
+            <p:dataTable id="addresses" widgetVar="addresses" var="address" value="#{userController.addresses}"
+                         editable="true" style="margin-bottom:20px">
+
+                <p:ajax event="rowEdit" listener="#{userController.onAddressEdit}" update=":form:msgs"/>
+                <p:ajax event="rowEditCancel" update=":form:msgs"/>
+
+                <p:column headerText="Id">
+                    <h:outputText value="#{address.id}"/>
+                </p:column>
+
+                <p:column headerText="Irányító szám">
+                    <p:cellEditor>
+                        <f:facet name="output"><h:outputText value="#{address.postalCode}"/></f:facet>
+                        <f:facet name="input">
+                            <p:inputText value="#{address.postalCode}"
+                                         required="true"
+                                         requiredMessage="Az irányítószámot kötelező megadni"
+                                         style="width:96%"
+                                         label="Postal code"/>
+                        </f:facet>
+                    </p:cellEditor>
+                </p:column>
+
+                <p:column headerText="Város">
+                    <p:cellEditor>
+                        <f:facet name="output"><h:outputText value="#{address.city}"/></f:facet>
+                        <f:facet name="input">
+                            <p:inputText value="#{address.city}"
+                                         required="true"
+                                         requiredMessage="A város nevet kötelező megadni."
+                                         style="width:96%"
+                                         label="Város"/>
+                        </f:facet>
+                    </p:cellEditor>
+                </p:column>
+
+                <p:column headerText="Utca">
+                    <p:cellEditor>
+                        <f:facet name="output"><h:outputText value="#{address.street}"/></f:facet>
+                        <f:facet name="input">
+                            <p:inputText value="#{address.street}"
+                                         required="true"
+                                         requiredMessage="Az utca nevet kötelező megadni."
+                                         style="width:96%"
+                                         label="Utca"/>
+                        </f:facet>
+                    </p:cellEditor>
+                </p:column>
+
+                <p:column headerText="Házszám">
+                    <p:cellEditor>
+                        <f:facet name="output"><h:outputText value="#{address.houseNumber}"/></f:facet>
+                        <f:facet name="input">
+                            <p:inputText value="#{address.houseNumber}"
+                                         required="true"
+                                         style="width:96%"
+                                         requiredMessage="A házszámot kötelező megadni"
+                                         label="Házszám"/>
+                        </f:facet>
+                    </p:cellEditor>
+                </p:column>
+                <p:column headerText="cím. szerk." style="width:35px">
+                    <p:rowEditor/>
+                </p:column>
+                <p:column headerText="cím. törl." style="width:35px">
+                    <p:commandButton icon="pi pi-times" process="@this" update="addresses" action="#{userController.deleteAddress(address)}">
+                        <f:ajax execute="action"/>
+                    </p:commandButton>
+                </p:column>
+            </p:dataTable>
+            <h:outputLink value="javascript:void(0)" onclick="PF('addAddressDlg').show();">
+                <p:commandButton
+                        type="button"
+                        value="Új cím"/>
+            </h:outputLink>
+        </p:dialog>
+
+        <p:dialog header="Új felhasználó hozzáadása" widgetVar="addUserDlg"
+                  resizable="false" modal="true" id="addUserDlg">
+
+            <p:ajax event="close" resetValues="true" update="users addUserDlg"/>
+
+            <h:panelGrid columns="2" cellpadding="5">
+                <h:outputLabel for="name" value="Név"/>
+                <p:inputText id="name"
+                             label="felhasználó neve"
+                             validatorMessage="Legalább 2 karakter hosszú legyen a felhasználónév"
+                             value="#{userController.user.name}">
+                    <f:validateLength minimum="2"/>
+                </p:inputText>
+
+                <h:outputLabel for="email" value="E-mail"/>
+                <p:inputText id="email"
+                             required="true"
+                             label="felhasználó email címe"
+                             value="#{userController.user.email}"
+                             validatorMessage="Nem megfelelő formátumú az email cím">
+                    <f:validateRegex pattern="[\w\.-]*[a-zA-Z0-9_]@[\w\.-]*[a-zA-Z0-9]\.[a-zA-Z][a-zA-Z\.]*[a-zA-Z]"/>
+                </p:inputText>
+
+                <p:outputLabel for="password" value="Jelszó: "/>
+                <p:password id="password"
+                            required="true" size="40"
+                            validatorMessage="A jelszó legalább 6 karakter legyen"
+                            value="#{userController.user.password}">
+                    <f:validateLength minimum="6"/>
+                </p:password>
+                <f:facet name="footer">
+                    <p:commandButton value="Mentés"
+                                     action="#{userController.saveUser}"
+                                     update="growl"
+                                     oncomplete="handleInsert(xhr, status, args, 'addUserDlg')"
+                                     process="addUserDlg">
+                    </p:commandButton>
+                </f:facet>
+            </h:panelGrid>
+        </p:dialog>
+
+        <p:dialog header="Új cím hozzáadás" widgetVar="addAddressDlg"
+                  resizable="false" modal="true" id="addAddressDlg">
+            <p:ajax event="close" resetValues="true" update="addAddressDlg addresses"/>
+
+            <h:panelGrid columns="2" cellpadding="5">
+                <h:outputLabel for="postalCode" value="Irányítószám"/>
+                <p:inputText id="postalCode"
+                             required="true"
+                             label="Irányítószám"
+                             requiredMessage="Kötelező megadni az irányítószámot!"
+                             value="#{userController.address.postalCode}">
+                </p:inputText>
+
+                <h:outputLabel for="city" value="Város"/>
+                <p:inputText id="city" required="true"
+                             label="Város"
+                             requiredMessage="Kötelező megadni az város nevet!"
+                             value="#{userController.address.city}">
+                </p:inputText>
+
+                <h:outputLabel for="street" value="Utca"/>
+                <p:inputText id="street"
+                             required="true"
+                             label="Utca"
+                             requiredMessage="Kötelező megadni az utca nevet!"
+                             value="#{userController.address.street}">
+                </p:inputText>
+
+                <h:outputLabel for="houseNum" value="Házszám"/>
+                <p:inputText id="houseNum"
+                             required="true"
+                             label="Házszám"
+                             requiredMessage="Kötelező megadni a házszámot!"
+                             value="#{userController.address.houseNumber}">
+                </p:inputText>
+
+                <f:facet name="footer">
+                    <p:commandButton value="Mentés"
+                                     action="#{userController.saveAddress}"
+                                     update="growl"
+                                     oncomplete="handleInsert(xhr, status, args, 'addAddressDlg')"
+                                     process="addAddressDlg">
+                    </p:commandButton>
+                </f:facet>
+            </h:panelGrid>
+        </p:dialog>
+    </h:form>
+</h:body>
+</html>
+
+
+

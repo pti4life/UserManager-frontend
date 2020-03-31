@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:h="http://java.sun.com/jsf/html"
+	  xmlns:p="http://primefaces.org/ui" xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+<h:head>
+	<title>Bejelentkező oldal</title>
+	<link rel="stylesheet" type="text/css" href="../resources/style/login.css"/>
+	<h:outputStylesheet library="style" name="index.css"  />
+</h:head>
+
+<h:body>
+	<h:form>
+		<p:growl id="growl" showDetail="true"/>
+		<p:panel header="Bejelentkezés" styleClass="loginPanel">
+			<h:panelGrid columns="2">
+
+				<p:outputLabel for="email" value="E-Mail:" />
+				<p:inputText id="email"
+							 value="#{loginController.user.email}"
+							 required="true" label="E-mail cím"
+							 validatorMessage="Nem megfelelő az email cím formátuma">
+					<f:validateRegex
+							pattern="[\w\.-]*[a-zA-Z0-9_]@[\w\.-]*[a-zA-Z0-9]\.[a-zA-Z][a-zA-Z\.]*[a-zA-Z]"/>
+				</p:inputText>
+
+				<p:outputLabel for="password" value="Jelszó:" />
+				<p:password id="password" required="true"
+							value="#{loginController.user.password}">
+				</p:password>
+
+				<p:commandButton value="Bejelentkezés"
+								 update="growl"
+								 action="#{loginController.login}">
+				</p:commandButton>
+			</h:panelGrid>
+		</p:panel>
+
+	</h:form>
+</h:body>
+
+</html>
+
+
+
