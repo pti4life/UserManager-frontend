@@ -3,7 +3,6 @@ package com.innovitech.usermanager.mbean;
 import com.innovitech.usermanager.filter.RequestFilter;
 import com.innovitech.usermanager.valueobject.User;
 import org.glassfish.jersey.client.ClientConfig;
-import org.glassfish.jersey.filter.LoggingFilter;
 
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;

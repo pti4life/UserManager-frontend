@@ -5,7 +5,6 @@ import com.innovitech.usermanager.response.UserResponse;
 import com.innovitech.usermanager.valueobject.Address;
 import com.innovitech.usermanager.valueobject.User;
 import org.glassfish.jersey.client.ClientConfig;
-import org.glassfish.jersey.filter.LoggingFilter;
 import org.primefaces.PrimeFaces;
 import org.primefaces.event.RowEditEvent;
 
