@@ -42,7 +42,7 @@ public class UserController {
 
     private User userForNewAddress = null;
 
-    private WebTarget webTarget = ClientBuilder.newClient(new ClientConfig().register(LoggingFilter.class))
+    private WebTarget webTarget = ClientBuilder.newClient(new ClientConfig())
             .target("http://localhost:8080/rest");
 
     private String token = null;

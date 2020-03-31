@@ -23,7 +23,7 @@ public class LoginController {
 
     private User user = new User();
 
-    private WebTarget webTarget = ClientBuilder.newClient(new ClientConfig().register(RequestFilter.class).register(LoggingFilter.class))
+    private WebTarget webTarget = ClientBuilder.newClient(new ClientConfig().register(RequestFilter.class))
             .target("http://localhost:8080/rest");
 
     private FacesContext facesContext = FacesContext.getCurrentInstance();
