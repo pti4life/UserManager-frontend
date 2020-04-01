@@ -75,9 +75,9 @@ public class UserController {
     }
 
     public void deleteUser(User user) {
-        Invocation.Builder invocationBuilder = webTarget.path("users/"+user.getId()).request(MediaType.APPLICATION_JSON).header("Authorization", token);
+        Invocation.Builder invocationBuilder = webTarget.path("users/" + user.getId()).request(MediaType.APPLICATION_JSON).header("Authorization", token);
         Response response = invocationBuilder.delete();
-        if(response.getStatus() != 200) {
+        if (response.getStatus() != 200) {
             FacesContext facesContext = FacesContext.getCurrentInstance();
             facesContext.addMessage(null, new FacesMessage("Error", "Valami hiba történt, vegye fel" +
                     "a kapcsoaltot a rendszergazdájával"));
@@ -88,14 +88,14 @@ public class UserController {
     }
 
     public void deleteAddress(Address address) {
-        Invocation.Builder invocationBuilder = webTarget.path("addresses/"+address.getId()).request().header("Authorization", token);
+        Invocation.Builder invocationBuilder = webTarget.path("addresses/" + address.getId()).request().header("Authorization", token);
         Response response = invocationBuilder.delete();
-        if(response.getStatus() != 200) {
+        if (response.getStatus() != 200) {
             FacesContext facesContext = FacesContext.getCurrentInstance();
             facesContext.addMessage(null, new FacesMessage("Error", "Valami hiba történt, vegye fel" +
                     "a kapcsoaltot a rendszergazdájával"));
         }
-        Invocation.Builder invocationBuilder2 = webTarget.path("addresses/"+address.getUser().getId()).request().header("Authorization", token);
+        Invocation.Builder invocationBuilder2 = webTarget.path("addresses/" + address.getUser().getId()).request().header("Authorization", token);
         AddressResponse addressResponse = invocationBuilder2.get(AddressResponse.class);
         this.addresses = addressResponse.getAddresses();
     }
@@ -110,7 +110,13 @@ public class UserController {
         Invocation.Builder invocationBuilder = webTarget.path("users").request(MediaType.APPLICATION_JSON).header("Authorization", token);
         Response response = invocationBuilder.put(Entity.entity(user, MediaType.APPLICATION_JSON));
 
-        if (response.getStatus() != 200) {
+        if (response.getStatus() == 400) {
+            facesContext.addMessage(null, new FacesMessage("Szerkesztés sikertelen", response.readEntity(String.class)));
+            Invocation.Builder invocationBuilder2 = webTarget.path("users").request().header("Authorization", token);
+            UserResponse userResponse = invocationBuilder2.get(UserResponse.class);
+            this.users = userResponse.getUsers();
+            return;
+        } else if (response.getStatus() != 200) {
             facesContext.addMessage(null, new FacesMessage("Error", "Valami hiba történt, vegye fel" +
                     "a kapcsoaltot a rendszergazdájával"));
         }
@@ -139,7 +145,11 @@ public class UserController {
         Address address = (Address) event.getObject();
         Invocation.Builder invocationBuilder = webTarget.path("addresses").request(MediaType.APPLICATION_JSON).header("Authorization", token);
         Response response = invocationBuilder.put(Entity.entity(address, MediaType.APPLICATION_JSON));
-        if (response.getStatus() != 200) {
+        if (response.getStatus() == 400) {
+            facesContext.addMessage(null, new FacesMessage("Szerkesztés sikertelen", "Ilyen email címmel már létezik" +
+                    "felhasználó"));
+            return;
+        } else if (response.getStatus() != 200) {
             facesContext.addMessage(null, new FacesMessage("Error", "Valami hiba történt, vegye fel" +
                     "a kapcsoaltot a rendszergazdájával"));
         }
@@ -149,11 +159,17 @@ public class UserController {
         FacesContext facesContext = FacesContext.getCurrentInstance();
         Invocation.Builder invocationBuilder = webTarget.path("users").request(MediaType.APPLICATION_JSON).header("Authorization", token);
         Response response = invocationBuilder.post(Entity.entity(this.user, MediaType.APPLICATION_JSON));
-        if (response.getStatus() != 200) {
+        int statusCode = response.getStatus();
+        if (statusCode == 400) {
+            facesContext.addMessage(null, new FacesMessage("Error", "Ilyen email címmel már létezik felhasználó!"));
+            PrimeFaces.current().executeScript("handleInsert(new Object(), status, {validationFailed: true}, 'addUserDlg');");
+            return;
+        } else if (statusCode != 200) {
             facesContext.addMessage(null, new FacesMessage("Error", "Valami hiba történt, vegye fel" +
                     "a kapcsoaltot a rendszergazdájával"));
+            return;
         }
-
+        PrimeFaces.current().executeScript("handleInsert(new Object(), status, {validationFailed: false}, 'addUserDlg');");
         Invocation.Builder ib = webTarget.path("users").request(MediaType.APPLICATION_JSON).header("Authorization", token);
         UserResponse ur = ib.get(UserResponse.class);
         this.users = ur.getUsers();

@@ -10,6 +10,7 @@
     <title>Users</title>
     <script type="text/javascript">
         function handleInsert(xhr, status, args, dialog) {
+            console.log(args.validationFailed);
             if (args.validationFailed) {
                 PF(dialog).jq.effect("shake", {
                     times: 3
@@ -225,7 +226,6 @@
                     <p:commandButton value="Mentés"
                                      action="#{userController.saveUser}"
                                      update="growl"
-                                     oncomplete="handleInsert(xhr, status, args, 'addUserDlg')"
                                      process="addUserDlg">
                     </p:commandButton>
                 </f:facet>
